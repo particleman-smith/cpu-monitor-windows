@@ -27,7 +27,6 @@ namespace HardwareMonitor
 
         private string[] ports;
         private SerialPort serial;
-        private string message = "";
 
         private static int currentCPULoad = 0;
         private static int currentCPUTemp = 0;
@@ -50,13 +49,38 @@ namespace HardwareMonitor
 
         private void SetupHardwareMonitor()
         {
+            Thread t = new Thread(new ThreadStart(MonitorHardware)) {};
+            t.Start();
+        }
 
+        /// <summary>
+        /// Gets the system info once every second
+        /// </summary>
+        private void MonitorHardware()
+        {
+            while (true)
+            {
+                GetSystemInfo();
+                // Update UI
+                mainWindow.Dispatcher.Invoke(new Action(() => { UpdateMonitorUI(); }));
+                // Update Arduino
+                UpdateSerialDevice();
+                Thread.Sleep(1000);
+            }
         }
 
         private void UpdateMonitorUI()
         {
             cpuLoadLabel.Content = currentCPULoad.ToString() + "%";
             cpuTempLabel.Content = currentCPUTemp.ToString() + "°";
+        }
+
+        private void UpdateSerialDevice()
+        {
+            if (serial != null && serial.IsOpen)
+            {
+                DelegateSendMessage(string.Format("C{0}c{1}", currentCPULoad, currentCPUTemp));
+            }
         }
 
         /// <summary>
@@ -101,19 +125,23 @@ namespace HardwareMonitor
 
         private void SendBtn_Click(object sender, RoutedEventArgs e)
         {
-            message = messageTxtBox.Text;
-            Thread messageSender = new Thread(new ThreadStart(SendMessage));
-            messageSender.Start();
+            DelegateSendMessage(messageTxtBox.Text);
         }
 
-        private void SendMessage()
+        private void DelegateSendMessage(string message)
+        {
+            Thread messageSender = new Thread(new ParameterizedThreadStart(SendMessage));
+            messageSender.Start(message);
+        }
+
+        private void SendMessage(object text)
         {
             if (serial.IsOpen)
             {
                 try
                 {
                     // Send the binary data out the port
-                    byte[] hexstring = Encoding.ASCII.GetBytes(message + TERM_CHAR); // Append terminating character
+                    byte[] hexstring = Encoding.ASCII.GetBytes(text + TERM_CHAR); // Append terminating character
                     foreach (byte hexval in hexstring)
                     {
                         byte[] _hexval = new byte[] { hexval };     // need to convert byte 
