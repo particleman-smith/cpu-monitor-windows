@@ -5,19 +5,15 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:HardwareMonitor"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
-        <ComboBox x:Name="portSelect" HorizontalAlignment="Left" Margin="32,26,0,0" VerticalAlignment="Top" Width="120" SelectionChanged="PortSelect_SelectionChanged"/>
-        <Button x:Name="connectBtn" Content="Connect" HorizontalAlignment="Left" Margin="32,53,0,0" VerticalAlignment="Top" Width="75" Click="ConnectBtn_Click"/>
-        <TextBox x:Name="messageTxtBox" HorizontalAlignment="Left" Height="23" Margin="244,25,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
-        <Button x:Name="sendBtn" Content="Send" HorizontalAlignment="Left" Margin="369,26,0,0" VerticalAlignment="Top" Width="75" Click="SendBtn_Click"/>
-        <Button x:Name="disconnectBtn" Content="Disconnect" HorizontalAlignment="Left" Margin="32,78,0,0" VerticalAlignment="Top" Width="75" Click="DisconnectBtn_Click"/>
-        <RichTextBox x:Name="outputBox" HorizontalAlignment="Left" Height="281" Margin="7,128,0,0" VerticalAlignment="Top" Width="775" IsReadOnly="True" Block.LineHeight="6">
-            <FlowDocument/>
-        </RichTextBox>
-        <Button x:Name="refreshSensorsBtn" Content="Refresh Sensors" HorizontalAlignment="Left" Margin="272,73,0,0" VerticalAlignment="Top" Width="114" Click="RefreshSensorsBtn_Click"/>
-        <Label x:Name="cpuLoadLabel" Content="0%" HorizontalAlignment="Left" Margin="544,46,0,0" VerticalAlignment="Top" Width="66"/>
-        <Label x:Name="cpuTempLabel" Content="0°C" HorizontalAlignment="Left" Margin="544,73,0,0" VerticalAlignment="Top" Width="66"/>
+        Title="Arduino Hardware Monitor" Height="154.496" Width="256.812" ResizeMode="CanMinimize" Closing="MainWindow_Closing">
+    <Grid x:Name="mainContentGrid" Background="#FF3C3C3C">
+        <ComboBox x:Name="portSelect" HorizontalAlignment="Left" Margin="32,26,0,0" VerticalAlignment="Top" Width="75" SelectionChanged="PortSelect_SelectionChanged"/>
+        <Button x:Name="disconnectBtn" Content="Disconnect" HorizontalAlignment="Left" Margin="32,78,0,0" VerticalAlignment="Top" Width="75" Click="DisconnectBtn_Click" Background="White"/>
+        <Label x:Name="cpuLoadLabel" Content="0%" HorizontalAlignment="Left" Margin="189,36,0,0" VerticalAlignment="Top" Width="52" Foreground="White"/>
+        <Label x:Name="cpuTempLabel" Content="0°C" HorizontalAlignment="Left" Margin="189,62,0,0" VerticalAlignment="Top" Width="52" Foreground="White"/>
+        <Label Content="CPU Temp:" HorizontalAlignment="Left" Margin="122,62,0,0" VerticalAlignment="Top" Foreground="White" HorizontalContentAlignment="Right"/>
+        <Label Content="CPU Load:" HorizontalAlignment="Left" Margin="125,36,0,0" VerticalAlignment="Top" Foreground="White" HorizontalContentAlignment="Right"/>
+        <Button x:Name="connectBtn" Content="Connect" HorizontalAlignment="Left" Margin="32,53,0,0" VerticalAlignment="Top" Width="75" Click="ConnectBtn_Click" Background="White"/>
 
     </Grid>
 </Window>

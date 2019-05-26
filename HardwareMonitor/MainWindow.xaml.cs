@@ -31,6 +31,8 @@ namespace HardwareMonitor
         private static int currentCPULoad = 0;
         private static int currentCPUTemp = 0;
 
+        private Thread hwUpdateThread;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -43,14 +45,14 @@ namespace HardwareMonitor
         private void SetupUI()
         {
             RefreshSerialPorts();
-
-            OutputMessage("Ready.\n");
+            connectBtn.IsEnabled = false;
+            disconnectBtn.IsEnabled = false;
         }
 
         private void SetupHardwareMonitor()
         {
-            Thread t = new Thread(new ThreadStart(MonitorHardware)) {};
-            t.Start();
+            hwUpdateThread = new Thread(new ThreadStart(MonitorHardware)) { };
+            hwUpdateThread.Start();
         }
 
         /// <summary>
@@ -61,10 +63,13 @@ namespace HardwareMonitor
             while (true)
             {
                 GetSystemInfo();
+
                 // Update UI
-                mainWindow.Dispatcher.Invoke(new Action(() => { UpdateMonitorUI(); }));
+                mainWindow.Dispatcher.Invoke(new Action(() => UpdateMonitorUI()));
+
                 // Update Arduino
                 UpdateSerialDevice();
+
                 Thread.Sleep(1000);
             }
         }
@@ -103,29 +108,33 @@ namespace HardwareMonitor
         private void PortSelect_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             serial = new SerialPort((string)portSelect.SelectedItem, 9600, Parity.None, 8, StopBits.One);
+            connectBtn.IsEnabled = true;
         }
 
-        private void TryConnectToArduino()
+        private bool TryConnectToArduino()
         {
             try
             {
                 serial.Open();
                 serial.DataReceived += new SerialDataReceivedEventHandler(Serial_OnDataReceive);
+                return true;
             }
             catch (Exception ex)
             {
-                OutputException(ex);
+                //OutputException(ex);
+                return false;
             }
         }
 
         private void ConnectBtn_Click(object sender, RoutedEventArgs e)
         {
-            TryConnectToArduino();
-        }
-
-        private void SendBtn_Click(object sender, RoutedEventArgs e)
-        {
-            DelegateSendMessage(messageTxtBox.Text);
+            bool connectSuccess = TryConnectToArduino();
+            if (connectSuccess)
+            {
+                portSelect.IsEnabled = false;
+                connectBtn.IsEnabled = false;
+                disconnectBtn.IsEnabled = true;
+            }
         }
 
         private void DelegateSendMessage(string message)
@@ -152,7 +161,7 @@ namespace HardwareMonitor
                 }
                 catch (Exception ex)
                 {
-                    OutputException(ex);
+                    //OutputException(ex);
                 }
             }
         }
@@ -161,26 +170,15 @@ namespace HardwareMonitor
         {
             SerialPort sp = (SerialPort)sender;
             string received = sp.ReadExisting();
-            OutputMessage(received);
+            //OutputMessage(received);
         }
 
         private void DisconnectBtn_Click(object sender, RoutedEventArgs e)
         {
             serial.Close();
-        }
-
-        private void OutputException(Exception ex)
-        {
-            TextRange output = new TextRange(outputBox.Document.ContentEnd, outputBox.Document.ContentEnd);
-            output.Text = ex.Message + "\n" + ex.StackTrace;
-            output.ApplyPropertyValue(TextElement.ForegroundProperty, Brushes.Red);
-        }
-
-        private void OutputMessage(string text, bool newLine = true)
-        {
-            TextRange output = new TextRange(outputBox.Document.ContentEnd, outputBox.Document.ContentEnd);
-            output.Text = text + (newLine ? "\r\n" : "");
-            output.ApplyPropertyValue(TextElement.ForegroundProperty, Brushes.Black);
+            portSelect.IsEnabled = true;
+            connectBtn.IsEnabled = true;
+            disconnectBtn.IsEnabled = false;
         }
 
         static void GetSystemInfo()
@@ -207,10 +205,12 @@ namespace HardwareMonitor
             computer.Close();
         }
 
-        private void RefreshSensorsBtn_Click(object sender, RoutedEventArgs e)
+        private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            GetSystemInfo();
-            UpdateMonitorUI();
+            if (serial != null && serial.IsOpen)
+                serial.Close();
+
+            hwUpdateThread.Abort();
         }
     }   
 }
