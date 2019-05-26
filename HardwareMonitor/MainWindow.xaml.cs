@@ -14,6 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using OpenHardwareMonitor.Hardware;
 
 namespace HardwareMonitor
 {
@@ -28,22 +29,51 @@ namespace HardwareMonitor
         private SerialPort serial;
         private string message = "";
 
+        private static int currentCPULoad = 0;
+        private static int currentCPUTemp = 0;
+
         public MainWindow()
         {
             InitializeComponent();
 
             SetupUI();
+
+            SetupHardwareMonitor();
         }
 
-        public void SetupUI()
+        private void SetupUI()
         {
+            RefreshSerialPorts();
+
+            OutputMessage("Ready.\n");
+        }
+
+        private void SetupHardwareMonitor()
+        {
+
+        }
+
+        private void UpdateMonitorUI()
+        {
+            cpuLoadLabel.Content = currentCPULoad.ToString() + "%";
+            cpuTempLabel.Content = currentCPUTemp.ToString() + "°";
+        }
+
+        /// <summary>
+        /// Gets all available serial ports and adds them to the list on the UI
+        /// </summary>
+        private void RefreshSerialPorts()
+        {
+            for (int i = 0; i < portSelect.Items.Count; i++)
+            {
+                portSelect.Items.RemoveAt(i);
+            }
+
             ports = SerialPort.GetPortNames();
             foreach (string port in ports)
             {
                 portSelect.Items.Add(port);
             }
-
-            OutputMessage("Ready.\n");
         }
 
         private void PortSelect_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -124,5 +154,35 @@ namespace HardwareMonitor
             output.Text = text + (newLine ? "\r\n" : "");
             output.ApplyPropertyValue(TextElement.ForegroundProperty, Brushes.Black);
         }
-    }
+
+        static void GetSystemInfo()
+        {
+            UpdateVisitor updateVisitor = new UpdateVisitor();
+            Computer computer = new Computer();
+            computer.Open();
+            computer.CPUEnabled = true;
+            computer.Accept(updateVisitor);
+            for (int i = 0; i < computer.Hardware.Length; i++)
+            {
+                if (computer.Hardware[i].HardwareType == HardwareType.CPU)
+                {
+                    for (int j = 0; j < computer.Hardware[i].Sensors.Length; j++)
+                    {
+                        ISensor currentSensor = computer.Hardware[i].Sensors[j];
+                        if (currentSensor.SensorType == SensorType.Temperature && currentSensor.Name == "CPU Package")
+                            currentCPUTemp = (int)(currentSensor.Value + 0.5);
+                        else if (currentSensor.SensorType == SensorType.Load && currentSensor.Name == "CPU Total")
+                            currentCPULoad = (int)(currentSensor.Value + 0.5);
+                    }
+                }
+            }
+            computer.Close();
+        }
+
+        private void RefreshSensorsBtn_Click(object sender, RoutedEventArgs e)
+        {
+            GetSystemInfo();
+            UpdateMonitorUI();
+        }
+    }   
 }
