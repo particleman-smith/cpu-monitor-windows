@@ -3,17 +3,36 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:HardwareMonitor"
+        xmlns:local="clr-namespace:HardwareMonitor.Views"
+        xmlns:tb="http://www.hardcodet.net/taskbar"
         mc:Ignorable="d"
-        Title="Arduino Hardware Monitor" Height="154.496" Width="256.812" ResizeMode="CanMinimize" Closing="MainWindow_Closing">
-    <Grid x:Name="mainContentGrid" Background="#FF3C3C3C">
-        <ComboBox x:Name="portSelect" HorizontalAlignment="Left" Margin="32,26,0,0" VerticalAlignment="Top" Width="75" SelectionChanged="PortSelect_SelectionChanged"/>
-        <Button x:Name="disconnectBtn" Content="Disconnect" HorizontalAlignment="Left" Margin="32,78,0,0" VerticalAlignment="Top" Width="75" Click="DisconnectBtn_Click" Background="White"/>
-        <Label x:Name="cpuLoadLabel" Content="0%" HorizontalAlignment="Left" Margin="189,36,0,0" VerticalAlignment="Top" Width="52" Foreground="White"/>
-        <Label x:Name="cpuTempLabel" Content="0°C" HorizontalAlignment="Left" Margin="189,62,0,0" VerticalAlignment="Top" Width="52" Foreground="White"/>
-        <Label Content="CPU Temp:" HorizontalAlignment="Left" Margin="122,62,0,0" VerticalAlignment="Top" Foreground="White" HorizontalContentAlignment="Right"/>
-        <Label Content="CPU Load:" HorizontalAlignment="Left" Margin="125,36,0,0" VerticalAlignment="Top" Foreground="White" HorizontalContentAlignment="Right"/>
-        <Button x:Name="connectBtn" Content="Connect" HorizontalAlignment="Left" Margin="32,53,0,0" VerticalAlignment="Top" Width="75" Click="ConnectBtn_Click" Background="White"/>
+        Title="Arduino Hardware Monitor" Height="154.496" Width="256.812" ResizeMode="CanMinimize" Closing="MainWindow_Closing" Visibility="Hidden">
+    <Grid x:Name="mainContentGrid">
+        <Grid x:Name="windowContentGrid" Background="#FF3C3C3C">
+            <ComboBox x:Name="portSelect" HorizontalAlignment="Left" Margin="32,26,0,0" VerticalAlignment="Top" Width="75" SelectionChanged="PortSelect_SelectionChanged"/>
+            <Button x:Name="disconnectBtn" Content="Disconnect" HorizontalAlignment="Left" Margin="32,78,0,0" VerticalAlignment="Top" Width="75" Click="DisconnectBtn_Click" Background="White"/>
+            <Label x:Name="cpuLoadLabel" Content="0%" HorizontalAlignment="Left" Margin="189,36,0,0" VerticalAlignment="Top" Width="52" Foreground="White"/>
+            <Label x:Name="cpuTempLabel" Content="0°C" HorizontalAlignment="Left" Margin="189,62,0,0" VerticalAlignment="Top" Width="52" Foreground="White"/>
+            <Label Content="CPU Temp:" HorizontalAlignment="Left" Margin="122,62,0,0" VerticalAlignment="Top" Foreground="White" HorizontalContentAlignment="Right"/>
+            <Label Content="CPU Load:" HorizontalAlignment="Left" Margin="125,36,0,0" VerticalAlignment="Top" Foreground="White" HorizontalContentAlignment="Right"/>
+            <Button x:Name="connectBtn" Content="Connect" HorizontalAlignment="Left" Margin="32,53,0,0" VerticalAlignment="Top" Width="75" Click="ConnectBtn_Click" Background="White"/>
+        </Grid>
 
+        <Grid x:Name="taskbarContentGrid">
+            <tb:TaskbarIcon x:Name="taskbarIcon" IconSource="/Images/icon.ico" ToolTipText="Hardware Monitor">
+                <tb:TaskbarIcon.TrayPopup>
+                    <Border 
+                        Background="#FF3C3C3C"
+                        BorderBrush="Black"
+                        BorderThickness="1px"
+                        CornerRadius="2"
+                        Opacity="0.9"
+                        Width="160"
+                        Height="40">
+                        <local:TaskbarMainView></local:TaskbarMainView>
+                    </Border>
+                </tb:TaskbarIcon.TrayPopup>
+            </tb:TaskbarIcon>
+        </Grid>
     </Grid>
 </Window>
